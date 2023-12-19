@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import Calendar from "./components/calendar";
+import Calendar from "./components/Calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import CoursesCard from "./components/CoursesCard";
 import { useEffect, useState } from "react";
