@@ -1,0 +1,94 @@
+.rbc-timeslot-group {
+  min-height: 120px !important;
+}
+
+.rbc-calendar {
+  min-height: 2000px;
+}
+
+.rbc-month-row {
+  .rbc-row-segment {
+    font-size: smaller;
+    .rbc-event {
+      .rbc-event-content {
+        .rbc-event-content-container {
+          .time {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+}
+
+.rbc-time-gutter {
+  width: 4.8rem !important;
+  .rbc-timeslot-group {
+    position: relative !important;
+  }
+
+  .rbc-time-slot {
+    .rbc-label {
+      position: absolute !important;
+      left: 50% !important ;
+      top: 50% !important;
+      transform: translate(-50%, -50%) !important;
+    }
+  }
+}
+
+.rbc-day-slot .rbc-events-container {
+  margin-right: 0 !important;
+}
+
+.rbc-event {
+  border-radius: 0 !important;
+  .rbc-event-content {
+    .rbc-event-content-container {
+      .time {
+        display: none;
+      }
+    }
+  }
+}
+
+.rbc-day-slot .rbc-time-slot {
+  border-top: 1px solid #cfc9c9 !important;
+}
+
+.rbc-time-content > * + * > * {
+  border-left: 3px solid #ddd !important;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 3px solid #ddd !important;
+}
+
+.schedule {
+  .rbc-time-header {
+    background-color: #ffff !important;
+  }
+  .rbc-time-content {
+    background-color: #ffff !important;
+  }
+  .rbc-time-view {
+    overflow-y: auto;
+    border-radius: 7px !important;
+    box-shadow: wheat;
+    -webkit-box-shadow: 0px -1px 5px 4px rgba(0, 0, 0, 0.11);
+    -moz-box-shadow: 0px -1px 5px 4px rgba(0, 0, 0, 0.11);
+    box-shadow: 0px -1px 5px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  .rbc-row-resource {
+    .rbc-header {
+      padding: 0.5rem !important;
+    }
+  }
+
+  .rbc-day-slot .rbc-event {
+    width: 100% !important;
+    left: 0 !important;
+    padding: 2px !important;
+  }
+}
