@@ -17,6 +17,8 @@ function App() {
     endOfClassesDate,
   });
 
+  console.log(courses);
+
   return (
     <Grid sx={{ paddingLeft: 5, paddingTop: 5 }} container spacing={4}>
       <Grid item xs={8}>

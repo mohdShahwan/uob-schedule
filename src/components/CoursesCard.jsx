@@ -66,6 +66,7 @@ const CoursesCard = ({ setCourses }) => {
       );
       const coursesData = [];
       const data = response.data;
+      console.log(data);
       // data will always contain two arrays
       // first array will have an a different arrays for each course
       // each course array will contain all sections
@@ -99,7 +100,7 @@ const CoursesCard = ({ setCourses }) => {
           const courseExamDate = courseExam[0].split("-");
           const courseExamDateJs = new Date(
             courseExamDate[2],
-            courseExamDate[1],
+            courseExamDate[1] - 1,
             courseExamDate[0]
           );
           const courseExamTime = courseExam[1].split("-");
