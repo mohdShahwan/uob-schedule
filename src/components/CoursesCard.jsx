@@ -14,8 +14,8 @@ import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import useFormPersist from "react-hook-form-persist";
 import PropTypes from "prop-types";
-import { convertNumToTime } from "../helpers/convertNumToTime";
-import { getDayNum } from "../helpers/getDayNum";
+import { convertNumToTime } from "../utils/convertNumToTime";
+import { getDayNum } from "../utils/getDayNum";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -69,7 +69,6 @@ const CoursesCard = ({ setCourses }) => {
       // data will always contain two arrays
       // first array will have an a different arrays for each course
       // each course array will contain all sections
-      console.log(data);
       const requestedCourses = data[0];
       const requestedCoursesTimes = data[1];
       for (const index in requestedCourses) {
@@ -83,13 +82,13 @@ const CoursesCard = ({ setCourses }) => {
         );
         const courseDetails = requestedCourses[index][sectionIndex];
         const courseTimes = requestedCoursesTimes[index][sectionIndex].map(
-          (recurrance) => {
+          (recurrence) => {
             return {
-              day: getDayNum(recurrance.d),
-              startTime: convertNumToTime(recurrance.f),
-              endTime: convertNumToTime(recurrance.t),
-              campus: recurrance.c === "S" ? "Sakhir" : "Salmaniya",
-              location: recurrance.i.split("  ")[0],
+              day: getDayNum(recurrence.d),
+              startTime: convertNumToTime(recurrence.f),
+              endTime: convertNumToTime(recurrence.t),
+              campus: recurrence.c === "S" ? "Sakhir" : "Salmaniya",
+              location: recurrence.i.split("  ")[0],
             };
           }
         );
@@ -137,7 +136,7 @@ const CoursesCard = ({ setCourses }) => {
       setCourses(coursesData);
       setIsLoading(false);
     } catch (error) {
-      console.log("Error Occured! " + error);
+      console.error("Error Ocurred! " + error);
     }
   };
 

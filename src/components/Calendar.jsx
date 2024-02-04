@@ -4,6 +4,8 @@ import PropTypes from "prop-types";
 import "../styles/calendar.scss";
 import { useMemo } from "react";
 import { darken } from "polished";
+import { Container } from "@mui/material";
+import Event from "./Event";
 
 const localizer = momentLocalizer(moment);
 
@@ -30,24 +32,17 @@ const Calendar = ({ events, currentDate, minTime, maxTime }) => {
 
   const components = useMemo(
     () => ({
-      event: ({ title, event }) => {
-        return (
-          <div className="h-full relative rbc-event-content-container">
-            <div className="time">
-              {moment(event.start).format("h:mm A")} -{" "}
-              {moment(event.end).format("h:mm A")}
-            </div>
-            <div className="title">{title}</div>
-            <div className="location">{event.location}</div>
-            {/* <div className="absolute bottom-0">{event.instructor}</div> */}
-          </div>
-        );
-      },
+      event: (props) => <Event {...props} />,
     }),
     []
   );
   return (
-    <div className="schedule overflow-auto">
+    <Container
+      className="schedule"
+      style={{
+        height: "95dvh",
+      }}
+    >
       <RBC
         localizer={localizer}
         events={events}
@@ -59,12 +54,11 @@ const Calendar = ({ events, currentDate, minTime, maxTime }) => {
         step={15}
         min={minTime}
         max={maxTime}
-        // date={currentDate}
         defaultView="week"
         defaultDate={currentDate}
         components={components}
       />
-    </div>
+    </Container>
   );
 };
 
