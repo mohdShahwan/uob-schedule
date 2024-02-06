@@ -18,6 +18,7 @@ import { convertNumToTime } from "../utils/convertNumToTime";
 import { getDayNum } from "../utils/getDayNum";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import toast from "react-hot-toast";
 
 const colors = [
   "#BDE6D5",
@@ -66,7 +67,6 @@ const CoursesCard = ({ setCourses }) => {
       );
       const coursesData = [];
       const data = response.data;
-      console.log(data);
       // data will always contain two arrays
       // first array will have an a different arrays for each course
       // each course array will contain all sections
@@ -135,9 +135,14 @@ const CoursesCard = ({ setCourses }) => {
         });
       }
       setCourses(coursesData);
-      setIsLoading(false);
+      toast.success("Schedule generated successfully");
     } catch (error) {
       console.error("Error Ocurred! " + error);
+      toast.error(
+        "Error Ocurred! Please make sure you entered correct course codes and section numbers"
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -165,35 +170,16 @@ const CoursesCard = ({ setCourses }) => {
                       event.target.value.toUpperCase()
                     );
                   }}
-                  {...register(`courses.${index}.code`)}
+                  {...register(`courses.${index}.code`, { required: true })}
                 />
-                {/* <Autocomplete
-                  fullWidth
-                  options={courses}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Course"
-                      {...register(`courses.${index}.course`)}
-                    />
-                  )}
-                /> */}
                 <TextField
                   fullWidth
                   label="Section"
-                  {...register(`courses.${index}.section`)}
+                  {...register(`courses.${index}.section`, {
+                    required: true,
+                    pattern: /^\d{1,3}$/,
+                  })}
                 />
-                {/* <Autocomplete
-                  fullWidth
-                  options={sections}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Section"
-                      {...register(`courses.${index}.section`)}
-                    />
-                  )}
-                /> */}
                 {fields.length > 4 && (
                   <IconButton
                     onClick={() => {

@@ -1,15 +1,21 @@
-import { Calendar as RBC, momentLocalizer } from "react-big-calendar";
+import { Box } from "@mui/material";
 import moment from "moment";
-import PropTypes from "prop-types";
-import "../styles/calendar.scss";
-import { useMemo } from "react";
 import { darken } from "polished";
-import { Container } from "@mui/material";
+import PropTypes from "prop-types";
+import { useMemo } from "react";
+import { Calendar as RBC, momentLocalizer } from "react-big-calendar";
+import "../styles/calendar.scss";
 import Event from "./Event";
 
 const localizer = momentLocalizer(moment);
 
-const Calendar = ({ events, currentDate, minTime, maxTime }) => {
+const Calendar = ({
+  events,
+  currentDate,
+  setCurrentDate,
+  minTime,
+  maxTime,
+}) => {
   const eventPropGetter = (event) => {
     // let backgroundColor = "#fef1ef";
     let backgroundColor = event.color;
@@ -37,7 +43,7 @@ const Calendar = ({ events, currentDate, minTime, maxTime }) => {
     []
   );
   return (
-    <Container
+    <Box
       className="schedule"
       style={{
         height: "95dvh",
@@ -46,7 +52,6 @@ const Calendar = ({ events, currentDate, minTime, maxTime }) => {
       <RBC
         localizer={localizer}
         events={events}
-        //   events={myEventsList}
         startAccessor="start"
         endAccessor="end"
         eventPropGetter={eventPropGetter}
@@ -55,16 +60,19 @@ const Calendar = ({ events, currentDate, minTime, maxTime }) => {
         min={minTime}
         max={maxTime}
         defaultView="week"
-        defaultDate={currentDate}
+        date={currentDate}
+        onNavigate={(date) => setCurrentDate(date)}
         components={components}
+        tooltipAccessor={({ instructor }) => `${instructor}`}
       />
-    </Container>
+    </Box>
   );
 };
 
 Calendar.propTypes = {
   events: PropTypes.array,
   currentDate: PropTypes.object,
+  setCurrentDate: PropTypes.func,
   minTime: PropTypes.object,
   maxTime: PropTypes.object,
 };

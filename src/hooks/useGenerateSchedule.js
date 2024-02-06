@@ -4,11 +4,11 @@ const today = new Date();
 
 export function useGenerateSchedule({
   courses,
+  setCurrentDate,
   startOfClassesDate,
   endOfClassesDate,
 }) {
   const [events, setEvents] = useState([]);
-  const [currentDate, setCurrentDate] = useState(new Date(today));
   const [minTime, setMinTime] = useState(
     new Date(today.getFullYear(), today.getMonth(), today.getDate(), 7)
   );
@@ -92,7 +92,7 @@ export function useGenerateSchedule({
       generateSchedule();
       findMinMaxDate();
     }
-  }, [courses, startOfClassesDate, endOfClassesDate]);
+  }, [courses, setCurrentDate, startOfClassesDate, endOfClassesDate]);
 
-  return { events, currentDate, minTime, maxTime };
+  return { events, minTime, maxTime };
 }
