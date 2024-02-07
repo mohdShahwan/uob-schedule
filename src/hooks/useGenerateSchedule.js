@@ -45,6 +45,7 @@ export function useGenerateSchedule({
                 location: recurrence.location,
                 instructor: course.courseDetails.instructor,
                 color: course.courseDetails.color,
+                type: "lecture",
               });
             }
           }
@@ -60,6 +61,7 @@ export function useGenerateSchedule({
             start,
             end,
             color: course.courseDetails.color,
+            type: "exam",
           });
         }
       }

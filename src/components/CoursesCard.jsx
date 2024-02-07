@@ -139,8 +139,9 @@ const CoursesCard = ({ setCourses }) => {
     } catch (error) {
       console.error("Error Ocurred! " + error);
       toast.error(
-        "Error Ocurred! Please make sure you entered correct course codes and section numbers"
+        "Please make sure you entered correct course codes and section numbers"
       );
+      setCourses([]);
     } finally {
       setIsLoading(false);
     }
