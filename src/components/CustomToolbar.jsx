@@ -47,7 +47,8 @@ function CustomToolbar({
         onNavigate("TODAY");
         break;
       default:
-        setCurrentDate(sortedExams.at(0).start);
+        setCurrentDate(sortedExams.at(-1).start);
+        onView("month");
         break;
     }
   }
@@ -81,7 +82,7 @@ function CustomToolbar({
         </button>
         {sortedExams.length > 0 && (
           <button type="button" onClick={() => navigate("EXAMS")}>
-            First Exam
+            Exams
           </button>
         )}
         <button type="button" onClick={() => navigate("PREV")}>
