@@ -19,7 +19,7 @@ function Event({ title, event }) {
 
 Event.propTypes = {
   title: PropTypes.string,
-  event: PropTypes.string,
+  event: PropTypes.object,
 };
 
 export default Event;

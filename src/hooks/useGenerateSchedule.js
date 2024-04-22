@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 
 const today = new Date();
 
+const formatTime = (minutes) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return [
+    `${hours.toString().padStart(2, "0")}`,
+    `${mins.toString().padStart(2, "0")}`,
+  ];
+};
+
 export function useGenerateSchedule({
   courses,
   setCurrentDate,
@@ -69,8 +78,8 @@ export function useGenerateSchedule({
       setEvents(newEvents);
     };
     const findMinMaxDate = () => {
-      const startTimeArray = [];
-      const endTimeArray = [];
+      let minStartTime = Infinity;
+      let maxStartTime = -Infinity;
       for (const course of courses) {
         for (const time of course.courseTimes) {
           const startTime = time.startTime.split(":");
@@ -79,16 +88,42 @@ export function useGenerateSchedule({
           const end = new Date(today);
           start.setHours(+startTime[0], +startTime[1]);
           end.setHours(+endTime[0], +endTime[1]);
-          startTimeArray.push(start);
-          endTimeArray.push(end);
+          const startMinutesSinceMidnight =
+            start.getHours() * 60 + start.getMinutes();
+          const endMinutesSinceMidnight =
+            end.getHours() * 60 + end.getMinutes();
+          if (startMinutesSinceMidnight < minStartTime) {
+            minStartTime = startMinutesSinceMidnight;
+          }
+          if (endMinutesSinceMidnight > maxStartTime) {
+            maxStartTime = endMinutesSinceMidnight;
+          }
         }
         if (course.courseDetails.exam) {
-          startTimeArray.push(course.courseDetails.exam.time.start);
-          endTimeArray.push(course.courseDetails.exam.time.end);
+          const examTimeObj = course.courseDetails.exam.time;
+          const start = new Date(examTimeObj.start);
+          const end = new Date(examTimeObj.end);
+          const startMinutesSinceMidnight =
+            start.getHours() * 60 + start.getMinutes();
+          const endMinutesSinceMidnight =
+            end.getHours() * 60 + end.getMinutes();
+          if (startMinutesSinceMidnight < minStartTime) {
+            minStartTime = startMinutesSinceMidnight;
+          }
+          if (endMinutesSinceMidnight > maxStartTime) {
+            maxStartTime = endMinutesSinceMidnight;
+          }
         }
       }
-      setMinTime(new Date(Math.min(...startTimeArray)));
-      setMaxTime(new Date(Math.max(...endTimeArray)));
+      // get proper format HH:mm
+      const [minHours, minMinutes] = formatTime(minStartTime);
+      const [maxHours, maxMinutes] = formatTime(maxStartTime);
+      const minDateObj = new Date();
+      const maxDateObj = new Date();
+      minDateObj.setHours(minHours, minMinutes, 0, 0);
+      maxDateObj.setHours(maxHours, maxMinutes, 0, 0);
+      setMinTime(minDateObj);
+      setMaxTime(maxDateObj);
     };
     if (courses.length > 0) {
       generateSchedule();

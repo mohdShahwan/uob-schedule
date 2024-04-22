@@ -6,7 +6,7 @@ CustomToolbar.propTypes = {
   onNavigate: PropTypes.func,
   onView: PropTypes.func,
   setCurrentDate: PropTypes.func,
-  views: PropTypes.string,
+  views: PropTypes.array,
   view: PropTypes.string,
   events: PropTypes.array,
 };
