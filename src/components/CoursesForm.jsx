@@ -34,7 +34,7 @@ function CoursesForm({ setCourses }) {
     name: "courses",
     rules: { minLength: 4, maxLength: 7 },
   });
-  useFormPersist("courses", { watch, setValue });
+  useFormPersist("courses", { watch, setValue, storage: window.localStorage });
 
   const onSubmit = async (values) => {
     try {
