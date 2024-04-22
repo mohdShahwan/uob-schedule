@@ -142,7 +142,7 @@ function CoursesForm({ setCourses }) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <CardContent>
         <Typography variant="h3" gutterBottom>
-          Courses
+          Courses 📚
         </Typography>
         {/* TODO: For better UX, use helpertext to show error messages */}
         <Stack spacing={{ xs: 1, sm: 2 }} useFlexGap flexWrap="wrap">
