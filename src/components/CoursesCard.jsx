@@ -68,13 +68,14 @@ const CoursesCard = ({ setCourses }) => {
       const coursesData = [];
       const data = response.data;
       // data will always contain two arrays
-      // first array will have an a different arrays for each course
+      // first array will have different arrays for each course
       // each course array will contain all sections
       const requestedCourses = data[0];
       const requestedCoursesTimes = data[1];
       for (const index in requestedCourses) {
         // each element in requested courses is an array of sections
         const courseCode = requestedCourses[index][0].c;
+        // get user section from all sections
         const neededSection = +courses.find(
           (course) => course.code.toLowerCase() === courseCode.toLowerCase()
         ).section;
