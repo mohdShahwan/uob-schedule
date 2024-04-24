@@ -63,7 +63,7 @@ function Calendar({ events, currentDate, setCurrentDate, minTime, maxTime }) {
       date={currentDate}
       onNavigate={(date) => setCurrentDate(date)}
       components={components}
-      tooltipAccessor={({ instructor }) => `${instructor || ""}`}
+      tooltipAccessor={({ instructor }) => instructor || ""}
     />
   );
 }

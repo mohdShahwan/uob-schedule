@@ -103,8 +103,7 @@ export function useGenerateSchedule({
           const examTimeObj = course.courseDetails.exam.time;
           const start = new Date(examTimeObj.start);
           const end = new Date(examTimeObj.end);
-          const startMinutesSinceMidnight =
-            start.getHours() * 60 + start.getMinutes();
+          const startMinutesSinceMidnight = start.getHours() * 60 + 0;
           const endMinutesSinceMidnight =
             end.getHours() * 60 + end.getMinutes();
           if (startMinutesSinceMidnight < minStartTime) {
