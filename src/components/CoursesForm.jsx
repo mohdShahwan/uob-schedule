@@ -19,6 +19,10 @@ import toast from "react-hot-toast";
 import { convertNumToTime } from "../utils/convertNumToTime";
 import { getDayNum } from "../utils/getDayNum";
 import { colors } from "../constants/colors";
+import { useEffect } from "react";
+
+const MIN = 1;
+const MAX = 7;
 
 function CoursesForm({ setCourses }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,8 +36,12 @@ function CoursesForm({ setCourses }) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "courses",
-    rules: { minLength: 4, maxLength: 7 },
+    rules: { minLength: MIN, maxLength: MAX },
   });
+  const [currentYear, setCurrentYear] = useState("");
+  const [currentSemester, setCurrentSemester] = useState("");
+  const [isLoadingYearSem, setIsLoadingYearSem] = useState(false);
+
   useFormPersist("courses", { watch, setValue, storage: window.localStorage });
 
   const onSubmit = async (values) => {
@@ -138,11 +146,41 @@ function CoursesForm({ setCourses }) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const getYearSem = async () => {
+      try {
+        setIsLoadingYearSem(true);
+        const response = await axios.get(
+          "https://usis.uob.edu.bh/uob_sis_WS/IntegrationModule.asmx/GetPLANNER_YERSMS"
+        );
+        setIsLoadingYearSem(false);
+        const data = response.data[0];
+        const currentAcademicYear = data.YER;
+        const nextAcademicYear = +currentAcademicYear + 1;
+        const academicYearFullFormat = `${currentAcademicYear}/${nextAcademicYear}`;
+        const academicSemester = data.SMS;
+        let semester = academicSemester === "3" ? "Summer" : academicSemester;
+        setCurrentYear(academicYearFullFormat);
+        setCurrentSemester(semester);
+      } catch (error) {
+        console.error("Error Ocurred! " + error);
+        toast.error("Error while getting current year and semester");
+      }
+    };
+    getYearSem();
+  }, []);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <CardContent>
-        <Typography variant="h3" gutterBottom>
-          Courses 📚
+        <Typography variant="h3">Courses 📚</Typography>
+        <Typography
+          sx={{ mb: 1.5, ml: 1.5 }}
+          color="text.secondary"
+          gutterBottom
+        >
+          {currentYear} - {currentSemester}
         </Typography>
         {/* TODO: For better UX, use helpertext to show error messages */}
         <Stack spacing={{ xs: 1, sm: 2 }} useFlexGap flexWrap="wrap">
@@ -172,10 +210,10 @@ function CoursesForm({ setCourses }) {
                   pattern: /^\d{1,3}$/,
                 })}
               />
-              {fields.length > 4 && (
+              {fields.length > MIN && (
                 <IconButton
                   onClick={() => {
-                    if (fields.length > 4) remove(index);
+                    if (fields.length > MIN) remove(index);
                   }}
                 >
                   <DeleteIcon color="error" />
