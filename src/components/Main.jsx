@@ -1,18 +1,20 @@
 import { Edit as EditIcon } from "@mui/icons-material";
-import { Box, Fab, Stack } from "@mui/material";
+import { Box, Card, Fab, Stack, useMediaQuery, useTheme } from "@mui/material";
+import { useState } from "react";
 import Calendar from "../components/Calendar";
 import CoursesCard from "../components/CoursesCard";
-import { useState } from "react";
+import CoursesForm from "../components/CoursesForm";
 import { useGenerateSchedule } from "../hooks/useGenerateSchedule";
 
 const startOfClassesDate = new Date(2024, 1, 11);
-// const holidays = []
 const endOfClassesDate = new Date(2024, 4, 28);
 const today = new Date();
 
 function Main() {
   const [courses, setCourses] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date(today));
+  const [showCoursesForm, setShowCoursesForm] = useState(false);
+
   const { events, maxTime, minTime } = useGenerateSchedule({
     courses,
     setCurrentDate,
@@ -20,12 +22,31 @@ function Main() {
     endOfClassesDate,
   });
 
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
     <>
-      <Stack direction={{ xs: "column", lg: "row" }} spacing={4}>
+      <Stack
+        direction={isSmallScreen ? "column" : "row"}
+        spacing={4}
+        sx={{
+          padding: isSmallScreen ? 1 : 2,
+          width: "100%",
+          height: "100vh",
+          boxSizing: "border-box",
+        }}
+      >
         <Box
           className="schedule"
-          sx={{ width: { xs: "100%", lg: "75%" }, height: "95dvh" }}
+          sx={{
+            flex: 1,
+            height: "100%",
+            overflow: "auto",
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 1,
+            boxShadow: theme.shadows[2],
+          }}
         >
           <Calendar
             events={events}
@@ -35,15 +56,37 @@ function Main() {
             maxTime={maxTime}
           />
         </Box>
-        <Box
+        {!isSmallScreen && (
+          <Box
+            sx={{
+              width: "25%",
+              height: "100%",
+              overflow: "auto",
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: 1,
+              boxShadow: theme.shadows[2],
+            }}
+          >
+            <CoursesCard setCourses={setCourses} />
+          </Box>
+        )}
+      </Stack>
+      {showCoursesForm && (
+        <Card
+          variant="outlined"
           sx={{
-            display: { xs: "none", lg: "block" },
-            width: "25%",
+            position: "fixed",
+            top: "5rem",
+            right: "3rem",
+            width: '90vw',
+            maxWidth: '500px',
+            zIndex: theme.zIndex.tooltip + 1, // Ensure it is above other elements
+            padding: 2,
           }}
         >
-          <CoursesCard setCourses={setCourses} />
-        </Box>
-      </Stack>
+          <CoursesForm setCourses={setCourses} />
+        </Card>
+      )}
       <Fab
         sx={{
           position: "fixed",
@@ -56,6 +99,7 @@ function Main() {
         }}
         variant="extended"
         color="primary"
+        onClick={() => setShowCoursesForm(prev => !prev)}
       >
         <EditIcon />
       </Fab>
