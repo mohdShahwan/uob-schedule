@@ -3,141 +3,122 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Button,
   CardActions,
+  CardContent,
   Divider,
   IconButton,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
 import axios from "axios";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import useFormPersist from "react-hook-form-persist";
 import toast from "react-hot-toast";
+import { colors } from "../constants/colors";
 import { convertNumToTime } from "../utils/convertNumToTime";
 import { getDayNum } from "../utils/getDayNum";
-import { colors } from "../constants/colors";
-import { useEffect } from "react";
 
-const MIN = 1;
-const MAX = 7;
+const MIN_COURSES = 1;
+const MAX_COURSES = 7;
 
 function CoursesForm({ setCourses }) {
   const [isLoading, setIsLoading] = useState(false);
-  const { register, handleSubmit, control, watch, setValue } = useForm({
-    defaultValues: {
-      courses: Array.from({ length: 4 }, () => {
-        return { code: "", section: "" };
-      }),
-    },
-  });
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "courses",
-    rules: { minLength: MIN, maxLength: MAX },
-  });
   const [currentYear, setCurrentYear] = useState("");
   const [currentSemester, setCurrentSemester] = useState("");
   const [isLoadingYearSem, setIsLoadingYearSem] = useState(false);
 
+  const { register, handleSubmit, control, watch, setValue } = useForm({
+    defaultValues: {
+      courses: Array.from({ length: 4 }, () => ({ code: "", section: "" })),
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "courses",
+    rules: { minLength: MIN_COURSES, maxLength: MAX_COURSES },
+  });
+
   useFormPersist("courses", { watch, setValue, storage: window.localStorage });
 
-  const onSubmit = async (values) => {
+  const fetchScheduleInfo = async (params) => {
     try {
-      const params = {
-        p1: "null",
-        p2: "null",
-        p3: "null",
-        p4: "null",
-        p5: "null",
-        p6: "null",
-        p7: "null",
-      };
-      const courses = values.courses;
-      for (const index in courses) {
-        if (courses[index].code) params[`p${+index + 1}`] = courses[index].code;
-      }
-      setIsLoading(true);
       const response = await axios.get(
         "https://usis.uob.edu.bh/uob_sis_WS/IntegrationModule.asmx/GetScheduleInfo",
         { params }
       );
-      const coursesData = [];
-      const data = response.data;
-      // data will always contain two arrays
-      // first array will have different arrays for each course
-      // each course array will contain all sections
-      const requestedCourses = data[0];
-      const requestedCoursesTimes = data[1];
-      for (const index in requestedCourses) {
-        // each element in requested courses is an array of sections
-        const courseCode = requestedCourses[index][0].c;
-        // get user section from all sections
-        const neededSection = +courses.find(
-          (course) => course.code.toLowerCase() === courseCode.toLowerCase()
-        ).section;
-        const sectionIndex = requestedCourses[index].findIndex(
-          (section) => +section.s === neededSection
+      return response.data;
+    } catch (error) {
+      throw new Error("Error fetching schedule info: " + error.message);
+    }
+  };
+
+  const parseCourseData = (data, courses) => {
+    const coursesData = [];
+    const [requestedCourses, requestedCoursesTimes] = data;
+    for (const [index, courseData] of requestedCourses.entries()) {
+      const courseCode = courseData[0].c;
+      const neededSection = +courses.find(
+        (course) => course.code.toLowerCase() === courseCode.toLowerCase()
+      ).section;
+      const sectionIndex = courseData.findIndex(
+        (section) => +section.s === neededSection
+      );
+      const courseDetails = courseData[sectionIndex];
+      const courseTimes = requestedCoursesTimes[index][sectionIndex].map(
+        (recurrence) => ({
+          day: getDayNum(recurrence.d),
+          startTime: convertNumToTime(recurrence.f),
+          endTime: convertNumToTime(recurrence.t),
+          campus: recurrence.c === "S" ? "Sakhir" : "Salmaniya",
+          location: recurrence.i.split("  ")[0],
+        })
+      );
+      let exam = null;
+      if (courseDetails.e) {
+        const [examDate, examTime] = courseDetails.e.split(" ");
+        const [day, month, year] = examDate.split("-").map(Number);
+        const [startTime, endTime] = examTime.split("-").map((t) =>
+          t.split(":").map(Number)
         );
-        const courseDetails = requestedCourses[index][sectionIndex];
-        const courseTimes = requestedCoursesTimes[index][sectionIndex].map(
-          (recurrence) => {
-            return {
-              day: getDayNum(recurrence.d),
-              startTime: convertNumToTime(recurrence.f),
-              endTime: convertNumToTime(recurrence.t),
-              campus: recurrence.c === "S" ? "Sakhir" : "Salmaniya",
-              location: recurrence.i.split("  ")[0],
-            };
-          }
-        );
-        // Exam
-        let exam = null;
-        if (courseDetails.e) {
-          const courseExam = courseDetails.e.split(" ");
-          const courseExamDate = courseExam[0].split("-");
-          const courseExamDateJs = new Date(
-            courseExamDate[2],
-            courseExamDate[1] - 1,
-            courseExamDate[0]
-          );
-          const courseExamTime = courseExam[1].split("-");
-          const courseExamStartTime = courseExamTime[0].split(":");
-          const courseExamStartTimeJs = new Date(courseExamDateJs);
-          courseExamStartTimeJs.setHours(
-            courseExamStartTime[0],
-            courseExamStartTime[1],
-            courseExamStartTime[2]
-          );
-          const courseExamEndTime = courseExamTime[1].split(":");
-          const courseExamEndTimeJs = new Date(courseExamDateJs);
-          courseExamEndTimeJs.setHours(
-            courseExamEndTime[0],
-            courseExamEndTime[1],
-            courseExamEndTime[2]
-          );
-          exam = {
-            date: courseExamDateJs,
-            time: { start: courseExamStartTimeJs, end: courseExamEndTimeJs },
-          };
-        }
-        coursesData.push({
-          courseDetails: {
-            code: courseDetails.c,
-            section: +courseDetails.s,
-            exam,
-            instructor: courseDetails.i,
-            color: colors[index],
+        exam = {
+          date: new Date(year, month - 1, day),
+          time: {
+            start: new Date(year, month - 1, day, ...startTime),
+            end: new Date(year, month - 1, day, ...endTime),
           },
-          courseTimes,
-        });
+        };
       }
+      coursesData.push({
+        courseDetails: {
+          code: courseDetails.c,
+          section: +courseDetails.s,
+          exam,
+          instructor: courseDetails.i,
+          color: colors[index],
+        },
+        courseTimes,
+      });
+    }
+    return coursesData;
+  };
+
+  const onSubmit = async (values) => {
+    setIsLoading(true);
+    try {
+      const params = values.courses.reduce((acc, course, index) => {
+        if (course.code) acc[`p${index + 1}`] = course.code;
+        return acc;
+      }, { p1: "null", p2: "null", p3: "null", p4: "null", p5: "null", p6: "null", p7: "null" });
+
+      const data = await fetchScheduleInfo(params);
+      const coursesData = parseCourseData(data, values.courses);
       setCourses(coursesData);
       toast.success("Schedule generated successfully");
     } catch (error) {
-      console.error("Error Ocurred! " + error);
+      console.error("Error occurred: " + error.message);
       toast.error(
         "Please make sure you entered correct course codes and section numbers"
       );
@@ -147,28 +128,30 @@ function CoursesForm({ setCourses }) {
     }
   };
 
+  const fetchYearAndSemester = async () => {
+    setIsLoadingYearSem(true);
+    try {
+      const response = await axios.get(
+        "https://usis.uob.edu.bh/uob_sis_WS/IntegrationModule.asmx/GetPLANNER_YERSMS"
+      );
+      const data = response.data[0];
+      const currentAcademicYear = data.YER;
+      const nextAcademicYear = +currentAcademicYear + 1;
+      const academicYearFullFormat = `${currentAcademicYear}/${nextAcademicYear}`;
+      const academicSemester = data.SMS;
+      const semester = academicSemester === "3" ? "Summer" : academicSemester;
+      setCurrentYear(academicYearFullFormat);
+      setCurrentSemester(semester);
+    } catch (error) {
+      console.error("Error occurred: " + error.message);
+      toast.error("Error while getting current year and semester");
+    } finally {
+      setIsLoadingYearSem(false);
+    }
+  };
+
   useEffect(() => {
-    const getYearSem = async () => {
-      try {
-        setIsLoadingYearSem(true);
-        const response = await axios.get(
-          "https://usis.uob.edu.bh/uob_sis_WS/IntegrationModule.asmx/GetPLANNER_YERSMS"
-        );
-        setIsLoadingYearSem(false);
-        const data = response.data[0];
-        const currentAcademicYear = data.YER;
-        const nextAcademicYear = +currentAcademicYear + 1;
-        const academicYearFullFormat = `${currentAcademicYear}/${nextAcademicYear}`;
-        const academicSemester = data.SMS;
-        let semester = academicSemester === "3" ? "Summer" : academicSemester;
-        setCurrentYear(academicYearFullFormat);
-        setCurrentSemester(semester);
-      } catch (error) {
-        console.error("Error Ocurred! " + error);
-        toast.error("Error while getting current year and semester");
-      }
-    };
-    getYearSem();
+    fetchYearAndSemester();
   }, []);
 
   return (
@@ -182,7 +165,6 @@ function CoursesForm({ setCourses }) {
         >
           {currentYear} - {currentSemester}
         </Typography>
-        {/* TODO: For better UX, use helpertext to show error messages */}
         <Stack spacing={{ xs: 1, sm: 2 }} useFlexGap flexWrap="wrap">
           {fields.map((field, index) => (
             <Stack
@@ -194,13 +176,16 @@ function CoursesForm({ setCourses }) {
               <TextField
                 fullWidth
                 label="Course"
-                onKeyUp={(event) => {
+                {...register(`courses.${index}.code`, { required: true })}
+                InputProps={{
+                  style: { textTransform: 'uppercase' },
+                }}
+                onChange={(event) => {
                   setValue(
                     `courses.${index}.code`,
                     event.target.value.toUpperCase()
                   );
                 }}
-                {...register(`courses.${index}.code`, { required: true })}
               />
               <TextField
                 fullWidth
@@ -210,10 +195,10 @@ function CoursesForm({ setCourses }) {
                   pattern: /^\d{1,3}$/,
                 })}
               />
-              {fields.length > MIN && (
+              {fields.length > MIN_COURSES && (
                 <IconButton
                   onClick={() => {
-                    if (fields.length > MIN) remove(index);
+                    remove(index);
                   }}
                 >
                   <DeleteIcon color="error" />
@@ -233,7 +218,7 @@ function CoursesForm({ setCourses }) {
         >
           Generate My Schedule
         </Button>
-        {fields.length < 7 && (
+        {fields.length < MAX_COURSES && (
           <Button variant="contained" onClick={() => append()}>
             <AddIcon />
           </Button>
@@ -243,8 +228,8 @@ function CoursesForm({ setCourses }) {
   );
 }
 
-export default CoursesForm;
-
 CoursesForm.propTypes = {
-  setCourses: PropTypes.func,
+  setCourses: PropTypes.func.isRequired,
 };
+
+export default CoursesForm;

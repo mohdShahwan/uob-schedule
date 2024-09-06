@@ -5,9 +5,9 @@ import CoursesCard from "../components/CoursesCard";
 import { useState } from "react";
 import { useGenerateSchedule } from "../hooks/useGenerateSchedule";
 
-const startOfClassesDate = new Date(2024, 1, 11);
+const startOfClassesDate = new Date(2024, 8, 8);
 // const holidays = []
-const endOfClassesDate = new Date(2024, 4, 28);
+const endOfClassesDate = new Date(2024, 11, 19);
 const today = new Date();
 
 function Main() {
