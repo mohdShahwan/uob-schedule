@@ -162,6 +162,7 @@ function CoursesForm({ setCourses }) {
           sx={{ mb: 1.5, ml: 1.5 }}
           color="text.secondary"
           gutterBottom
+          isLoading={isLoadingYearSem}
         >
           {currentYear} - {currentSemester}
         </Typography>
